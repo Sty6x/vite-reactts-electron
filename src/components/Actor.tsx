@@ -1,3 +1,7 @@
-export const Actor = () => {
-	return <div>Actor Component</div>;
+interface ActorProps {
+	children: React.ReactNode;
+}
+
+export const Actor = ({ children }: ActorProps) => {
+	return <div>{children}</div>;
 };
