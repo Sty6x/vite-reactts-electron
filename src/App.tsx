@@ -2,39 +2,41 @@ import { useRef, useState } from "react";
 import logoVite from "./assets/logo-vite.svg";
 import logoElectron from "./assets/logo-electron.svg";
 import "./App.scss";
-import { Status } from "./components/Status";
-import { Heading } from "./components/Heading";
-import { Actor } from "./components/Actor";
-import { Button } from "./components/Button";
-import { Input } from "./components/Input";
+import ReactMarkdown from "react-markdown";
+
 console.log(
 	"[App.tsx]",
 	`Hello world from Electron ${process.versions.electron}!`
 );
 
+interface InputProps {
+	handleChange: (e: React.ChangeEvent<HTMLInputElement>) => null;
+}
 function App() {
 	const [count, setCount] = useState(0);
+	const [userInput, setUserInput] = useState<string>("");
+
+	function handleChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
+		const inputValue: string = e.target.value;
+		setUserInput(inputValue);
+	}
+
 	return (
 		<div className="App">
-			<Status status="error" />
-			<Actor>
-				<Heading>Heading on Actor</Heading>
-			</Actor>
-
-			<Input
-				value=""
-				handleChange={(event) => {
-					console.log(event.target.value);
-				}}
-			/>
-			<Button
-				handleClick={(e) => {
-					console.log(e.target);
-					console.log("button clicked");
-				}}
-			>
-				Click Me
-			</Button>
+			<div>
+				<h1>Editor</h1>
+				<div>
+					<textarea
+						style={{ color: "black" }}
+						value={userInput}
+						onChange={handleChange}
+					/>
+				</div>
+			</div>
+			<div>
+				<h1>Markdown</h1>
+				<ReactMarkdown children={userInput} />
+			</div>
 		</div>
 	);
 }
