@@ -10,6 +10,7 @@ function App() {
 	const [count, setCount] = useState(0);
 	const [userInput, setUserInput] = useState<string>("");
 	const editorRef = useRef<HTMLDivElement>();
+
 	function handleChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
 		const inputValue: string = e.target.value;
 		setUserInput(inputValue);
@@ -17,8 +18,7 @@ function App() {
 	return (
 		<div className="App">
 			<div>
-				<h1>Editor</h1>
-				<div ref={editorRef} id="editor-Parent"></div>
+				<div ref={editorRef} id="editor-parent" />
 			</div>
 			<div>
 				<h1>Markdown</h1>
