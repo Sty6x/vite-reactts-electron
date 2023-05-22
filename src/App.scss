@@ -24,9 +24,10 @@ body,
 		color: #242424;
 		min-width: 50%;
 		display: flex;
-		// div:first-of-type {
-		// 	flex: 1;
-		// }
+
+		& > div[class^="cm-theme-light"] {
+			flex: 1;
+		}
 	}
 
 	.md {
@@ -44,12 +45,15 @@ body,
 .cm-scroller {
 	flex: 1;
 }
+.cm-gutters {
+	display: inline;
+}
 
 .sheet-slider {
 	border: red 1px solid;
 	height: 100vh;
 	width: 4px;
-	// padding: 0px 1px;
+	padding: 0px 1px;
 	&:hover {
 		cursor: ew-resize;
 	}

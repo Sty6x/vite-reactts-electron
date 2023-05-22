@@ -75,7 +75,7 @@ function App() {
 				<CodeMirror
 					value={userInput}
 					onChange={onChange}
-					// width="100%"
+					minWidth="100%"
 					minHeight="100vh"
 					extensions={[
 						vim(),
