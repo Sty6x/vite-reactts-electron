@@ -1,7 +1,7 @@
 import React, { useRef, useState, useCallback, useEffect } from "react";
 import "./App.scss";
 import CodeMirror, { getStatistics } from "@uiw/react-codemirror";
-import { vim } from "@replit/codemirror-vim";
+import { Vim, vim } from "@replit/codemirror-vim";
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { languages } from "@codemirror/language-data";
 import { ReactMarkdown } from "react-markdown/lib/react-markdown";
@@ -21,8 +21,8 @@ interface CurrentMousePos {
 }
 function App() {
 	const [count, setCount] = useState(0);
-
-	const [sizes, setSizes] = useState([100, "30%", "auto"]);
+	const [sizes, setSizes] = useState(["15%", "50%"]);
+	const [searchInput, setSearchInput] = useState<string>("");
 	const [userInput, setUserInput] = useState<string>(`
 # Header 1
 ## jsCode snippet and some shit that i dont understand
@@ -37,22 +37,55 @@ function App() {
 
 
 `);
-	const [editorLines, setEditorLines] = useState<number>();
-	const editorRef = useRef<HTMLTextAreaElement>();
-	const appRef = useRef<HTMLTextAreaElement>();
+
+	const projList = [
+		{ title: "random title" },
+		{ title: "lol titlem, query strings" },
+		{ title: "lol title, query strings" },
+		{ title: "This is a vim markdown app" },
+		{ title: "I love vim" },
+	];
+
 	const onChange = useCallback((value: string, viewUpdate) => {
 		setUserInput(value);
 	}, []);
+
+	const handleOnChange = useCallback(
+		(e: React.ChangeEvent<HTMLInputElement>) => {
+			const target: string = e.target.value;
+			setSearchInput(target);
+		},
+		[]
+	);
+	Vim.defineEx("write", "w", () => {
+		console.log("Write");
+	});
+	Vim.defineEx("quit", "q", () => {
+		console.log("Quit");
+		setSizes(["auto", "0%"]);
+	});
 	return (
 		<div className="App">
 			<SplitPane split="vertical" sizes={sizes} onChange={setSizes}>
-				<Pane className="pane" minSize={"0px"}>
+				<Pane className="pane" maxSize={"20%"} minSize={"0px"}>
+					<div>
+						<input
+							type="search"
+							value={searchInput}
+							onChange={handleOnChange}
+						/>
+						{projList.map((proj, i) => {
+							return <li key={i}>{proj.title}</li>;
+						})}
+					</div>
+				</Pane>
+				<Pane className="pane" maxSize={"50%"} minSize={"0px"}>
 					<div className="editor-container">
 						<CodeMirror
 							value={userInput}
 							onChange={onChange}
 							minWidth="100%"
-							minHeight="100vh"
+							height="100%"
 							extensions={[
 								vim(),
 								markdown({
@@ -68,9 +101,6 @@ function App() {
 							onCreateEditor={(view, state) => {
 								console.log(state.doc);
 								console.log("vim");
-							}}
-							onUpdate={(viewUp) => {
-								console.log(getStatistics(viewUp).lineCount);
 							}}
 						/>
 					</div>
