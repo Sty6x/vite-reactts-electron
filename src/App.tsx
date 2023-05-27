@@ -7,7 +7,9 @@ import { languages } from "@codemirror/language-data";
 import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { dark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { materialDark as prismMD } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { materialDark } from "@uiw/codemirror-theme-material";
+import { nord } from "@uiw/codemirror-theme-nord";
 import "github-markdown-css";
 import SplitPane from "split-pane-react/esm/SplitPane";
 import { Pane } from "split-pane-react";
@@ -21,9 +23,18 @@ interface CurrentMousePos {
 }
 function App() {
 	const [count, setCount] = useState(0);
-	const [sizes, setSizes] = useState(["15%", "50%"]);
+	const [sizes, setSizes] = useState(["50%"]);
 	const [searchInput, setSearchInput] = useState<string>("");
-	const [userInput, setUserInput] = useState<string>(`
+
+	const [noteLists, setNoteLists] = useState([
+		{ title: "random title" },
+		{ title: "lol titlem, query strings" },
+		{ title: "lol title, query strings" },
+		{ title: "This is a vim markdown app" },
+		{ title: "I love vim" },
+	]);
+	const originalNotes = useRef([...noteLists]);
+	const [userInput, setUserInput] = useState<string>(`This is a title
 # Header 1
 ## jsCode snippet and some shit that i dont understand
 		This is a code snippet
@@ -35,16 +46,22 @@ function App() {
 2. Ordered list item 2
 3. Ordered list item 3
 
-
+\`\`\`js
+const searchQuery = useCallback(
+	(input: string, noteList: Array<{ title: string }>) => {
+			const filterNotes = noteList.filter((note) => {
+				return note.title.includes(input) && note;
+			});
+			console.log(filterNotes);
+			if (input !== "") {
+				return setNoteLists(filterNotes);
+			}
+			return setNoteLists(originalNotes);
+		},
+		[]
+	);
+\`\`\`\
 `);
-
-	const projList = [
-		{ title: "random title" },
-		{ title: "lol titlem, query strings" },
-		{ title: "lol title, query strings" },
-		{ title: "This is a vim markdown app" },
-		{ title: "I love vim" },
-	];
 
 	const onChange = useCallback((value: string, viewUpdate) => {
 		setUserInput(value);
@@ -62,26 +79,46 @@ function App() {
 	});
 	Vim.defineEx("quit", "q", () => {
 		console.log("Quit");
-		setSizes(["auto", "0%"]);
+		setSizes(["0%"]);
 	});
+
+	const searchQuery = useCallback(
+		(input: string, noteList: Array<{ title: string }>) => {
+			const filterNotes = noteList.filter((note) => {
+				return note.title.includes(input) && note;
+			});
+			console.log(filterNotes);
+			if (input !== "") {
+				return setNoteLists(filterNotes);
+			}
+			return setNoteLists(originalNotes.current);
+		},
+		[]
+	);
+
+	useEffect(() => {
+		console.log(searchInput);
+		console.log(noteLists);
+		searchQuery(searchInput, noteLists);
+	}, [searchInput]);
+
 	return (
 		<div className="App">
+			<div>
+				<input
+					type="search"
+					value={searchInput}
+					onChange={handleOnChange}
+				/>
+				{noteLists.map((note, i) => {
+					return <li key={i}>{note.title}</li>;
+				})}
+			</div>
 			<SplitPane split="vertical" sizes={sizes} onChange={setSizes}>
-				<Pane className="pane" maxSize={"20%"} minSize={"0px"}>
-					<div>
-						<input
-							type="search"
-							value={searchInput}
-							onChange={handleOnChange}
-						/>
-						{projList.map((proj, i) => {
-							return <li key={i}>{proj.title}</li>;
-						})}
-					</div>
-				</Pane>
-				<Pane className="pane" maxSize={"50%"} minSize={"0px"}>
+				<Pane className="pane" maxSize={"50%"} minSize={"1px"}>
 					<div className="editor-container">
 						<CodeMirror
+							theme={materialDark}
 							value={userInput}
 							onChange={onChange}
 							minWidth="100%"
@@ -96,7 +133,7 @@ function App() {
 							]}
 							basicSetup={{
 								lineNumbers: true,
-								highlightActiveLine: false,
+								// highlightActiveLine: false,
 							}}
 							onCreateEditor={(view, state) => {
 								console.log(state.doc);
@@ -115,8 +152,11 @@ function App() {
 								return !inline && match ? (
 									<SyntaxHighlighter
 										{...props}
+										showLineNumbers={true}
 										children={String(children).replace(/\n$/, "")}
-										style={dark}
+										style={prismMD}
+										// useInlineStyles={false}
+										customStyle={{ borderRadius: "10px", margin: 0 }}
 										language={match[1]}
 										PreTag="div"
 									/>
